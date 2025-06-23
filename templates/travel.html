@@ -1,0 +1,793 @@
+{% extends "base.html" %}
+
+{% block title %}Travel Map{% endblock %}
+
+{% block meta_description %}Explore the places {{ personal_info.name if personal_info else "I have" }} visited around the world through an interactive travel map and journey stories.{% endblock %}
+
+{% block additional_css %}
+<style>
+    /* Travel Hero Section */
+    .travel-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 6rem 0 4rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .travel-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="M0,400 Q250,300 500,400 T1000,400 L1000,1000 L0,1000 Z" fill="rgba(255,255,255,0.1)"/></svg>');
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+    }
+    
+    .travel-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        color: #f59e0b;
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    /* Map Container */
+    .map-container {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        margin: 3rem 0;
+        min-height: 500px;
+        position: relative;
+    }
+    
+    .map-wrapper {
+        position: relative;
+        width: 100%;
+        height: 500px;
+        background: #f8fafc;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .simple-map {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to bottom, #87CEEB 0%, #98FB98 50%, #F4A460 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* Travel Markers */
+    .travel-marker {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        background: #ef4444;
+        border: 3px solid white;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        animation: pulse 2s infinite;
+    }
+    
+    .travel-marker:hover {
+        transform: scale(1.3);
+        z-index: 10;
+    }
+    
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+    
+    /* Tooltip */
+    .marker-tooltip {
+        position: absolute;
+        bottom: 35px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.9);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+        z-index: 20;
+    }
+    
+    .marker-tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 5px solid transparent;
+        border-top-color: rgba(0,0,0,0.9);
+    }
+    
+    .travel-marker:hover .marker-tooltip {
+        opacity: 1;
+    }
+    
+    /* Travel Stats */
+    .travel-stats {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 3rem 0;
+        margin: 3rem 0;
+    }
+    
+    .stat-card {
+        text-align: center;
+        padding: 2rem 1rem;
+    }
+    
+    .stat-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+    
+    /* Travel Stories */
+    .travel-story {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s ease;
+        border-left: 4px solid var(--primary-color);
+    }
+    
+    .travel-story:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .story-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .story-flag {
+        font-size: 2rem;
+        margin-right: 1rem;
+    }
+    
+    .story-location {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+    
+    .story-year {
+        margin-left: auto;
+        background: var(--accent-color);
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 15px;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .story-content {
+        color: var(--text-dark);
+        line-height: 1.6;
+    }
+    
+    /* Interactive Elements */
+    .map-controls {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        z-index: 10;
+    }
+    
+    .control-btn {
+        background: white;
+        border: none;
+        padding: 0.5rem;
+        margin: 0.2rem;
+        border-radius: 5px;
+        cursor: pointer;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.3s ease;
+    }
+    
+    .control-btn:hover {
+        background: var(--primary-color);
+        color: white;
+    }
+    
+    /* Legend */
+    .map-legend {
+        position: absolute;
+        bottom: 1rem;
+        left: 1rem;
+        background: rgba(255,255,255,0.95);
+        padding: 1rem;
+        border-radius: 10px;
+        box-shadow: var(--shadow-sm);
+        z-index: 10;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .legend-marker {
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+    }
+    
+    .legend-marker.visited { background: #ef4444; }
+    .legend-marker.planned { background: #f59e0b; }
+    
+    /* Bucket List */
+    .bucket-list {
+        background: var(--bg-light);
+        padding: 4rem 0;
+    }
+    
+    .bucket-item {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+    }
+    
+    .bucket-item:hover {
+        transform: translateX(10px);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .bucket-icon {
+        font-size: 1.5rem;
+        color: var(--accent-color);
+        margin-right: 1rem;
+        width: 40px;
+        text-align: center;
+    }
+    
+    .bucket-content {
+        flex: 1;
+    }
+    
+    .bucket-title {
+        font-weight: 600;
+        color: var(--primary-color);
+        margin-bottom: 0.3rem;
+    }
+    
+    .bucket-description {
+        color: var(--text-light);
+        font-size: 0.9rem;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .travel-hero {
+            padding: 4rem 0 2rem;
+        }
+        
+        .travel-icon {
+            font-size: 3rem;
+        }
+        
+        .map-wrapper {
+            height: 400px;
+        }
+        
+        .stat-card {
+            padding: 1rem;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+        }
+        
+        .story-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .story-year {
+            margin-left: 0;
+            margin-top: 0.5rem;
+        }
+        
+        .map-legend {
+            position: relative;
+            margin-top: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="travel-hero">
+    <div class="container">
+        <div class="hero-content fade-in">
+            <div class="travel-icon">
+                <i class="fas fa-globe-americas"></i>
+            </div>
+            <h1 class="font-display mb-3">Travel Adventures</h1>
+            <p class="lead">
+                Exploring the world, one destination at a time. Each journey brings new perspectives, 
+                cultures, and unforgettable memories that shape who I am.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Interactive Map Section -->
+<section class="section-padding">
+    <div class="container">
+        <h2 class="section-title font-display text-gradient fade-in">Places I've Visited</h2>
+        <p class="section-subtitle fade-in">Click on the markers to explore my travel experiences</p>
+        
+        <div class="map-container slide-in-up">
+            <div class="map-wrapper">
+                <div class="simple-map" id="travelMap">
+                    <!-- Map Controls -->
+                    <div class="map-controls">
+                        <button class="control-btn" onclick="resetMapView()" title="Reset View">
+                            <i class="fas fa-home"></i>
+                        </button>
+                        <button class="control-btn" onclick="toggleFullscreen()" title="Fullscreen">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Travel Markers will be generated by JavaScript -->
+                    
+                    <!-- Map Legend -->
+                    <div class="map-legend">
+                        <h6 class="mb-2">Legend</h6>
+                        <div class="legend-item">
+                            <div class="legend-marker visited"></div>
+                            <span>Visited</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-marker planned"></div>
+                            <span>Planned</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Travel Statistics -->
+<section class="travel-stats">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3 col-6">
+                <div class="stat-card fade-in">
+                    <i class="fas fa-map-marker-alt stat-icon"></i>
+                    <span class="stat-number" data-count="{{ travel_locations|length }}">0</span>
+                    <span class="stat-label">Countries Visited</span>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stat-card fade-in">
+                    <i class="fas fa-plane stat-icon"></i>
+                    <span class="stat-number" data-count="15">0</span>
+                    <span class="stat-label">Flights Taken</span>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stat-card fade-in">
+                    <i class="fas fa-camera stat-icon"></i>
+                    <span class="stat-number" data-count="1000">0</span>
+                    <span class="stat-label">Photos Captured</span>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="stat-card fade-in">
+                    <i class="fas fa-globe stat-icon"></i>
+                    <span class="stat-number" data-count="3">0</span>
+                    <span class="stat-label">Continents</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Travel Stories -->
+<section class="section-padding">
+    <div class="container">
+        <h2 class="section-title font-display text-gradient fade-in">Travel Stories</h2>
+        <p class="section-subtitle fade-in">Memorable moments from my journeys around the world</p>
+        
+        <div class="row">
+            {% for location in travel_locations %}
+            <div class="col-lg-6">
+                <div class="travel-story slide-in-{% if loop.index is odd %}left{% else %}right{% endif %}">
+                    <div class="story-header">
+                        <div class="story-flag">
+                            {% if 'USA' in location.name %}🇺🇸
+                            {% elif 'UK' in location.name %}🇬🇧
+                            {% elif 'Japan' in location.name %}🇯🇵
+                            {% elif 'France' in location.name %}🇫🇷
+                            {% elif 'Australia' in location.name %}🇦🇺
+                            {% else %}🌍
+                            {% endif %}
+                        </div>
+                        <div class="story-location">{{ location.name }}</div>
+                        <div class="story-year">{{ location.year }}</div>
+                    </div>
+                    <div class="story-content">
+                        {% if 'New York' in location.name %}
+                        <p>The energy of the Big Apple was absolutely infectious! From the towering skyscrapers of Manhattan to the vibrant street art in Brooklyn, every corner told a story. The highlight was watching the sunrise from the Top of the Rock - a moment that reminded me why they call it the city that never sleeps.</p>
+                        {% elif 'London' in location.name %}
+                        <p>London's perfect blend of historic charm and modern innovation left me mesmerized. Walking through the cobblestone streets, visiting the British Museum, and experiencing the tech scene in Shoreditch opened my eyes to the city's incredible diversity and rich cultural heritage.</p>
+                        {% elif 'Tokyo' in location.name %}
+                        <p>Tokyo challenged every preconception I had about modern cities. The seamless integration of technology into daily life, the respect for tradition alongside cutting-edge innovation, and the incredible attention to detail in everything from food to public transportation was truly inspiring.</p>
+                        {% elif 'Paris' in location.name %}
+                        <p>Paris taught me to appreciate the finer things in life. Beyond the iconic landmarks, it was the small moments - morning coffee at a local café, conversations with locals, and the artistic atmosphere - that made this trip unforgettable.</p>
+                        {% elif 'Sydney' in location.name %}
+                        <p>Sydney's laid-back vibe and stunning natural beauty provided the perfect balance to urban exploration. From the iconic Opera House to the beautiful beaches, this city showed me how modern metropolitan areas can coexist harmoniously with nature.</p>
+                        {% else %}
+                        <p>An incredible destination that broadened my perspective and created lasting memories. Each journey teaches valuable lessons about different cultures, ways of life, and the beauty of human diversity.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Travel Bucket List -->
+<section class="bucket-list">
+    <div class="container">
+        <h2 class="section-title font-display text-gradient fade-in">Travel Bucket List</h2>
+        <p class="section-subtitle fade-in">Dream destinations for future adventures</p>
+        
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="bucket-item fade-in">
+                    <div class="bucket-icon">
+                        <i class="fas fa-mountain"></i>
+                    </div>
+                    <div class="bucket-content">
+                        <div class="bucket-title">Hiking in Patagonia</div>
+                        <div class="bucket-description">Exploring the breathtaking landscapes of Argentina and Chile</div>
+                    </div>
+                </div>
+                
+                <div class="bucket-item fade-in">
+                    <div class="bucket-icon">
+                        <i class="fas fa-torii-gate"></i>
+                    </div>
+                    <div class="bucket-content">
+                        <div class="bucket-title">Temple Hopping in Kyoto</div>
+                        <div class="bucket-description">Discovering traditional Japanese culture and architecture</div>
+                    </div>
+                </div>
+                
+                <div class="bucket-item fade-in">
+                    <div class="bucket-icon">
+                        <i class="fas fa-igloo"></i>
+                    </div>
+                    <div class="bucket-content">
+                        <div class="bucket-title">Northern Lights in Iceland</div>
+                        <div class="bucket-description">Witnessing nature's most spectacular light show</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="bucket-item fade-in">
+                    <div class="bucket-icon">
+                        <i class="fas fa-camera-retro"></i>
+                    </div>
+                    <div class="bucket-content">
+                        <div class="bucket-title">Photography Safari in Kenya</div>
+                        <div class="bucket-description">Capturing wildlife in their natural habitat</div>
+                    </div>
+                </div>
+                
+                <div class="bucket-item fade-in">
+                    <div class="bucket-icon">
+                        <i class="fas fa-water"></i>
+                    </div>
+                    <div class="bucket-content">
+                        <div class="bucket-title">Diving in the Maldives</div>
+                        <div class="bucket-description">Exploring underwater paradise and coral reefs</div>
+                    </div>
+                </div>
+                
+                <div class="bucket-item fade-in">
+                    <div class="bucket-icon">
+                        <i class="fas fa-landmark"></i>
+                    </div>
+                    <div class="bucket-content">
+                        <div class="bucket-title">Ancient Ruins in Peru</div>
+                        <div class="bucket-description">Trekking to Machu Picchu and exploring Inca heritage</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="section-padding">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <div class="card-custom p-4 fade-in">
+                    <h3 class="font-display mb-3">Travel Companion Wanted!</h3>
+                    <p class="mb-4">
+                        Love to travel? Have recommendations for amazing destinations? 
+                        I'm always planning my next adventure and would love to hear about your experiences!
+                    </p>
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <a href="{{ url_for('contact') }}" class="btn btn-primary-custom">
+                            <i class="fas fa-route me-2"></i>Share Travel Tips
+                        </a>
+                        <a href="{{ url_for('hobbies') }}" class="btn btn-outline-custom">
+                            <i class="fas fa-camera me-2"></i>View My Photography
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block additional_js %}
+<script>
+    // Travel locations data
+    const travelLocations = {{ travel_locations | tojson | safe }};
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize travel map
+        initializeTravelMap();
+        
+        // Animate travel statistics
+        animateTravelStats();
+        
+        // Add interactive effects
+        addInteractiveEffects();
+    });
+    
+    function initializeTravelMap() {
+        const mapContainer = document.getElementById('travelMap');
+        
+        // Create markers for each travel location
+        travelLocations.forEach((location, index) => {
+            const marker = createTravelMarker(location, index);
+            mapContainer.appendChild(marker);
+        });
+    }
+    
+    function createTravelMarker(location, index) {
+        const marker = document.createElement('div');
+        marker.className = 'travel-marker';
+        marker.style.animationDelay = `${index * 0.5}s`;
+        
+        // Position marker based on simplified coordinates
+        const x = mapToX(location.lng);
+        const y = mapToY(location.lat);
+        marker.style.left = x + '%';
+        marker.style.top = y + '%';
+        
+        // Create tooltip
+        const tooltip = document.createElement('div');
+        tooltip.className = 'marker-tooltip';
+        tooltip.textContent = `${location.name} (${location.year})`;
+        marker.appendChild(tooltip);
+        
+        // Add click event
+        marker.addEventListener('click', () => showLocationDetails(location));
+        
+        return marker;
+    }
+    
+    function mapToX(lng) {
+        // Simple longitude to X coordinate conversion (0-100%)
+        return ((lng + 180) / 360) * 100;
+    }
+    
+    function mapToY(lat) {
+        // Simple latitude to Y coordinate conversion (0-100%)
+        return (90 - lat) / 180 * 100;
+    }
+    
+    function showLocationDetails(location) {
+        // Create and show modal with location details
+        const modalHtml = `
+            <div class="modal fade" id="locationModal" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header" style="background: var(--gradient-primary); color: white;">
+                            <h5 class="modal-title">
+                                <i class="fas fa-map-marker-alt me-2"></i>${location.name}
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p><strong>Year Visited:</strong> ${location.year}</p>
+                            <p><strong>Coordinates:</strong> ${location.lat}°, ${location.lng}°</p>
+                            <p>This destination holds special memories and contributed to my personal growth and worldview.</p>
+                            <div class="text-center mt-3">
+                                <img src="https://via.placeholder.com/300x200/667eea/ffffff?text=${encodeURIComponent(location.name)}" 
+                                     alt="${location.name}" class="img-fluid rounded">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary-custom" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-2"></i>Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Remove existing modal if any
+        const existingModal = document.getElementById('locationModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+        
+        // Add new modal to DOM
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('locationModal'));
+        modal.show();
+    }
+    
+    function animateTravelStats() {
+        // Animated counter for travel stats
+        function animateCounter(element) {
+            const target = parseInt(element.getAttribute('data-count'));
+            let current = 0;
+            const increment = target / 100;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current);
+            }, 20);
+        }
+        
+        // Intersection observer for stats animation
+        const statsObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const counter = entry.target.querySelector('.stat-number');
+                    if (counter && !counter.classList.contains('animated')) {
+                        counter.classList.add('animated');
+                        animateCounter(counter);
+                    }
+                }
+            });
+        });
+        
+        // Observe stat cards
+        document.querySelectorAll('.stat-card').forEach(card => {
+            statsObserver.observe(card);
+        });
+    }
+    
+    function addInteractiveEffects() {
+        // Parallax effect for travel stories
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const travelStories = document.querySelectorAll('.travel-story');
+            
+            travelStories.forEach((story, index) => {
+                const speed = 0.1 + (index * 0.05);
+                const yPos = -(scrolled * speed);
+                story.style.transform = `translateY(${yPos}px)`;
+            });
+        });
+        
+        // Interactive bucket list items
+        const bucketItems = document.querySelectorAll('.bucket-item');
+        bucketItems.forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.borderLeft = '4px solid var(--accent-color)';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.borderLeft = 'none';
+            });
+        });
+    }
+    
+    function resetMapView() {
+        // Simple zoom reset - in a real implementation, this would reset map zoom/pan
+        const markers = document.querySelectorAll('.travel-marker');
+        markers.forEach(marker => {
+            marker.style.transform = 'scale(1)';
+        });
+    }
+    
+    function toggleFullscreen() {
+        const mapContainer = document.querySelector('.map-container');
+        
+        if (!document.fullscreenElement) {
+            mapContainer.requestFullscreen().catch(err => {
+                console.log('Fullscreen not available');
+            });
+        } else {
+            document.exitFullscreen();
+        }
+    }
+    
+    // Add CSS for fullscreen mode
+    document.addEventListener('fullscreenchange', function() {
+        const mapContainer = document.querySelector('.map-container');
+        if (document.fullscreenElement) {
+            mapContainer.style.position = 'fixed';
+            mapContainer.style.top = '0';
+            mapContainer.style.left = '0';
+            mapContainer.style.width = '100vw';
+            mapContainer.style.height = '100vh';
+            mapContainer.style.zIndex = '9999';
+            mapContainer.style.borderRadius = '0';
+        } else {
+            mapContainer.style.position = 'relative';
+            mapContainer.style.top = 'auto';
+            mapContainer.style.left = 'auto';
+            mapContainer.style.width = 'auto';
+            mapContainer.style.height = 'auto';
+            mapContainer.style.zIndex = 'auto';
+            mapContainer.style.borderRadius = '20px';
+        }
+    });
+</script>
+{% endblock %}
