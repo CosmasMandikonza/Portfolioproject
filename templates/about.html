@@ -1,0 +1,886 @@
+{% extends "base.html" %}
+
+{% block title %}About Me{% endblock %}
+
+{% block meta_description %}Learn more about {{ personal_info.name if personal_info else "me" }} - my background, journey into technology, values, and what drives my passion for software engineering.{% endblock %}
+
+{% block additional_css %}
+<style>
+    /* About Hero Section */
+    .about-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 8rem 0 6rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .about-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="M0,300 Q500,100 1000,300 L1000,1000 L0,1000 Z" fill="rgba(255,255,255,0.1)"/></svg>');
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .hero-image {
+        width: 250px;
+        height: 250px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 6px solid white;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        margin-bottom: 2rem;
+        transition: all 0.3s ease;
+    }
+    
+    .hero-image:hover {
+        transform: scale(1.05);
+        box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+    }
+    
+    .hero-title {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .hero-subtitle {
+        font-size: 1.3rem;
+        opacity: 0.9;
+        margin-bottom: 2rem;
+    }
+    
+    /* Story Section */
+    .story-section {
+        padding: 6rem 0;
+        background: white;
+    }
+    
+    .story-card {
+        background: var(--bg-light);
+        border-radius: 20px;
+        padding: 3rem;
+        margin-bottom: 3rem;
+        position: relative;
+        border-left: 5px solid var(--primary-color);
+        transition: all 0.3s ease;
+    }
+    
+    .story-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+        border-left-color: var(--accent-color);
+    }
+    
+    .story-icon {
+        font-size: 3rem;
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    
+    .story-icon::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 80px;
+        height: 80px;
+        background: rgba(37, 99, 235, 0.1);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        z-index: -1;
+    }
+    
+    .story-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+    
+    .story-content {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: var(--text-dark);
+    }
+    
+    /* Values Section */
+    .values-section {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 6rem 0;
+        position: relative;
+    }
+    
+    .values-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 3rem;
+        margin-top: 3rem;
+    }
+    
+    .value-card {
+        text-align: center;
+        padding: 2rem;
+        background: rgba(255,255,255,0.1);
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+    
+    .value-card:hover {
+        background: rgba(255,255,255,0.2);
+        transform: translateY(-10px);
+    }
+    
+    .value-icon {
+        font-size: 3rem;
+        margin-bottom: 1.5rem;
+        color: var(--accent-color);
+    }
+    
+    .value-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    
+    .value-description {
+        opacity: 0.9;
+        line-height: 1.6;
+    }
+    
+    /* Journey Timeline */
+    .journey-section {
+        padding: 6rem 0;
+        background: var(--bg-light);
+    }
+    
+    .journey-timeline {
+        position: relative;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .timeline-line {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--gradient-primary);
+        transform: translateX(-50%);
+        border-radius: 2px;
+    }
+    
+    .journey-item {
+        position: relative;
+        margin: 4rem 0;
+        opacity: 0;
+        transform: translateY(50px);
+        transition: all 0.6s ease;
+    }
+    
+    .journey-item.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    .journey-item:nth-child(odd) .journey-content {
+        margin-right: 55%;
+        text-align: right;
+    }
+    
+    .journey-item:nth-child(even) .journey-content {
+        margin-left: 55%;
+        text-align: left;
+    }
+    
+    .journey-marker {
+        position: absolute;
+        left: 50%;
+        top: 30px;
+        width: 30px;
+        height: 30px;
+        background: var(--primary-color);
+        border: 5px solid white;
+        border-radius: 50%;
+        transform: translateX(-50%);
+        z-index: 2;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+    }
+    
+    .journey-item:hover .journey-marker {
+        transform: translateX(-50%) scale(1.2);
+        box-shadow: 0 0 0 10px rgba(37, 99, 235, 0.2);
+    }
+    
+    .journey-content {
+        background: white;
+        padding: 2.5rem;
+        border-radius: 15px;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    .journey-content:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+    
+    .journey-year {
+        font-size: 0.9rem;
+        color: var(--accent-color);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .journey-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+    
+    .journey-description {
+        color: var(--text-dark);
+        line-height: 1.7;
+    }
+    
+    /* Fun Facts */
+    .fun-facts {
+        background: white;
+        padding: 6rem 0;
+    }
+    
+    .fact-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        margin-top: 3rem;
+    }
+    
+    .fact-card {
+        text-align: center;
+        padding: 2rem 1rem;
+        background: var(--bg-light);
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    
+    .fact-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary-color);
+        background: white;
+        box-shadow: var(--shadow-md);
+    }
+    
+    .fact-number {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+    
+    .fact-label {
+        color: var(--text-light);
+        font-weight: 500;
+    }
+    
+    /* Personality Section */
+    .personality-section {
+        background: var(--bg-light);
+        padding: 6rem 0;
+    }
+    
+    .personality-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 3rem;
+        margin-top: 3rem;
+    }
+    
+    .personality-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        text-align: center;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .personality-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: var(--gradient-primary);
+    }
+    
+    .personality-card:hover {
+        transform: translateY(-10px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .personality-emoji {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        animation: bounce 2s infinite;
+    }
+    
+    .personality-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+    
+    .personality-description {
+        color: var(--text-dark);
+        line-height: 1.6;
+    }
+    
+    /* Quote Section */
+    .quote-section {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 4rem 0;
+        text-align: center;
+    }
+    
+    .quote-content {
+        max-width: 800px;
+        margin: 0 auto;
+        position: relative;
+    }
+    
+    .quote-icon {
+        font-size: 4rem;
+        opacity: 0.3;
+        margin-bottom: 2rem;
+    }
+    
+    .quote-text {
+        font-size: 1.5rem;
+        font-style: italic;
+        line-height: 1.8;
+        margin-bottom: 2rem;
+    }
+    
+    .quote-author {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .about-hero {
+            padding: 6rem 0 4rem;
+        }
+        
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .hero-image {
+            width: 200px;
+            height: 200px;
+        }
+        
+        .story-card {
+            padding: 2rem;
+        }
+        
+        .timeline-line {
+            left: 30px;
+        }
+        
+        .journey-marker {
+            left: 30px;
+        }
+        
+        .journey-item:nth-child(odd) .journey-content,
+        .journey-item:nth-child(even) .journey-content {
+            margin-left: 70px;
+            margin-right: 0;
+            text-align: left;
+        }
+        
+        .values-grid,
+        .fact-grid,
+        .personality-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .quote-text {
+            font-size: 1.2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="about-hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 text-center text-lg-start">
+                <div class="hero-content fade-in">
+                    <h1 class="hero-title font-display">About Me</h1>
+                    <p class="hero-subtitle">
+                        Software Engineer • Problem Solver • Lifelong Learner
+                    </p>
+                    <p class="lead">
+                        {{ personal_info.about[:200] if personal_info else "Passionate about creating innovative solutions and building meaningful connections in the tech community." }}
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <img src="{{ url_for('static', filename='images/' + personal_info.profile_image) if personal_info else 'https://via.placeholder.com/300x300/667eea/ffffff?text=Profile' }}" 
+                     alt="{{ personal_info.name if personal_info else 'Profile' }}" 
+                     class="hero-image slide-in-right"
+                     onerror="this.src='https://via.placeholder.com/300x300/667eea/ffffff?text={{ personal_info.name[0] if personal_info and personal_info.name else 'P' }}'">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- My Story Section -->
+<section class="story-section">
+    <div class="container">
+        <h2 class="section-title font-display text-gradient fade-in">My Journey</h2>
+        <p class="section-subtitle fade-in">From curious beginner to passionate developer</p>
+        
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="story-card slide-in-up">
+                    <div class="story-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h3 class="story-title">The Beginning</h3>
+                    <div class="story-content">
+                        <p>
+                            My journey into technology began with curiosity and a simple question: "How do computers really work?" 
+                            What started as tinkering with basic HTML pages quickly evolved into a deep fascination with the endless 
+                            possibilities of software engineering.
+                        </p>
+                        <p>
+                            The moment I wrote my first Python script that automated a tedious task, I knew I had found my calling. 
+                            The ability to solve real-world problems through code felt like having a superpower, and I've been 
+                            hooked ever since.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="story-card slide-in-up">
+                    <div class="story-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 class="story-title">Learning & Growth</h3>
+                    <div class="story-content">
+                        <p>
+                            My formal education in Computer Science provided a strong foundation, but the real learning happened 
+                            through countless hours of building projects, debugging code, and collaborating with fellow developers. 
+                            Each challenge taught me something new, whether it was a technical skill or a valuable life lesson about 
+                            persistence and problem-solving.
+                        </p>
+                        <p>
+                            The MLH Fellowship has been a transformative experience, exposing me to industry-standard practices, 
+                            collaborative development, and the importance of building reliable, scalable systems. It's where 
+                            theoretical knowledge meets real-world application.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="story-card slide-in-up">
+                    <div class="story-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3 class="story-title">What Drives Me</h3>
+                    <div class="story-content">
+                        <p>
+                            Technology has the power to create positive change in the world, and I want to be part of that impact. 
+                            Whether it's building accessible web applications, contributing to open-source projects, or mentoring 
+                            newcomers to the field, I believe in using my skills to make a difference.
+                        </p>
+                        <p>
+                            I'm particularly passionate about creating inclusive, user-friendly experiences and writing clean, 
+                            maintainable code that others can build upon. The best solutions are not just functional – they're 
+                            elegant, accessible, and built with the user's needs at the center.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Core Values -->
+<section class="values-section">
+    <div class="container">
+        <h2 class="section-title font-display fade-in">Core Values</h2>
+        <p class="section-subtitle fade-in">The principles that guide my work and life</p>
+        
+        <div class="values-grid">
+            <div class="value-card fade-in">
+                <div class="value-icon">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <h3 class="value-title">Continuous Learning</h3>
+                <p class="value-description">
+                    Technology evolves rapidly, and staying curious and adaptable is essential. 
+                    I embrace new challenges as opportunities to grow and expand my skillset.
+                </p>
+            </div>
+            
+            <div class="value-card fade-in">
+                <div class="value-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="value-title">Collaboration</h3>
+                <p class="value-description">
+                    The best solutions emerge from diverse perspectives working together. 
+                    I value open communication, constructive feedback, and shared success.
+                </p>
+            </div>
+            
+            <div class="value-card fade-in">
+                <div class="value-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3 class="value-title">Quality & Integrity</h3>
+                <p class="value-description">
+                    I believe in doing things right, not just fast. Quality code, honest communication, 
+                    and ethical practices are non-negotiable in my work.
+                </p>
+            </div>
+            
+            <div class="value-card fade-in">
+                <div class="value-icon">
+                    <i class="fas fa-globe"></i>
+                </div>
+                <h3 class="value-title">Impact & Purpose</h3>
+                <p class="value-description">
+                    Every line of code should serve a purpose. I strive to build solutions that 
+                    make a positive difference in people's lives and the world around us.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Journey Timeline -->
+<section class="journey-section">
+    <div class="container">
+        <h2 class="section-title font-display text-gradient fade-in">My Technical Journey</h2>
+        <p class="section-subtitle fade-in">Key milestones in my development career</p>
+        
+        <div class="journey-timeline">
+            <div class="timeline-line"></div>
+            
+            <div class="journey-item">
+                <div class="journey-marker">1</div>
+                <div class="journey-content">
+                    <div class="journey-year">2022</div>
+                    <h3 class="journey-title">First Steps</h3>
+                    <div class="journey-description">
+                        Started my Computer Science degree and wrote my first "Hello World" program. 
+                        The excitement of seeing code come to life sparked a passion that continues to grow.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="journey-item">
+                <div class="journey-marker">2</div>
+                <div class="journey-content">
+                    <div class="journey-year">2023</div>
+                    <h3 class="journey-title">Building Foundations</h3>
+                    <div class="journey-description">
+                        Mastered fundamental programming concepts and built my first web application. 
+                        Discovered the power of frameworks like Flask and started contributing to open-source projects.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="journey-item">
+                <div class="journey-marker">3</div>
+                <div class="journey-content">
+                    <div class="journey-year">2024</div>
+                    <h3 class="journey-title">Real-World Experience</h3>
+                    <div class="journey-description">
+                        Completed my first internship, working on production systems and learning industry best practices. 
+                        Won a hackathon and gained confidence in my ability to build complete solutions.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="journey-item">
+                <div class="journey-marker">4</div>
+                <div class="journey-content">
+                    <div class="journey-year">2025</div>
+                    <h3 class="journey-title">MLH Fellowship</h3>
+                    <div class="journey-description">
+                        Joined the MLH Fellowship to deepen my understanding of production engineering and site reliability. 
+                        Currently building scalable applications and learning from industry experts.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Fun Facts -->
+<section class="fun-facts">
+    <div class="container">
+        <h2 class="section-title font-display text-gradient fade-in">Fun Facts About Me</h2>
+        
+        <div class="fact-grid">
+            <div class="fact-card fade-in">
+                <span class="fact-number" data-count="500">0</span>
+                <span class="fact-label">Lines of Code This Week</span>
+            </div>
+            
+            <div class="fact-card fade-in">
+                <span class="fact-number" data-count="15">0</span>
+                <span class="fact-label">GitHub Repositories</span>
+            </div>
+            
+            <div class="fact-card fade-in">
+                <span class="fact-number" data-count="3">0</span>
+                <span class="fact-label">Programming Languages</span>
+            </div>
+            
+            <div class="fact-card fade-in">
+                <span class="fact-number" data-count="24">0</span>
+                <span class="fact-label">Coffee Cups This Month</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Personality Traits -->
+<section class="personality-section">
+    <div class="container">
+        <h2 class="section-title font-display text-gradient fade-in">What Makes Me Tick</h2>
+        <p class="section-subtitle fade-in">A glimpse into my personality and working style</p>
+        
+        <div class="personality-grid">
+            <div class="personality-card fade-in">
+                <div class="personality-emoji">🎯</div>
+                <h3 class="personality-title">Goal-Oriented</h3>
+                <p class="personality-description">
+                    I thrive on setting clear objectives and working systematically towards achieving them. 
+                    Every project gets broken down into manageable milestones.
+                </p>
+            </div>
+            
+            <div class="personality-card fade-in">
+                <div class="personality-emoji">🤝</div>
+                <h3 class="personality-title">Team Player</h3>
+                <p class="personality-description">
+                    I believe great software is built by great teams. I enjoy pair programming, 
+                    code reviews, and sharing knowledge with colleagues.
+                </p>
+            </div>
+            
+            <div class="personality-card fade-in">
+                <div class="personality-emoji">🔍</div>
+                <h3 class="personality-title">Detail-Oriented</h3>
+                <p class="personality-description">
+                    From clean code to pixel-perfect UIs, I care about the small things that 
+                    make a big difference in user experience and maintainability.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Inspirational Quote -->
+<section class="quote-section">
+    <div class="container">
+        <div class="quote-content fade-in">
+            <div class="quote-icon">
+                <i class="fas fa-quote-left"></i>
+            </div>
+            <div class="quote-text">
+                "The best way to predict the future is to create it. In software engineering, 
+                we have the unique opportunity to build the tools and experiences that will 
+                shape tomorrow's world."
+            </div>
+            <div class="quote-author">
+                - My personal philosophy
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="section-padding">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <div class="card-custom p-4 fade-in">
+                    <h3 class="font-display mb-3">Let's Build Something Together</h3>
+                    <p class="mb-4">
+                        I'm always excited to collaborate on interesting projects, share knowledge, 
+                        or just have a good conversation about technology and its potential.
+                    </p>
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <a href="{{ url_for('contact') }}" class="btn btn-primary-custom">
+                            <i class="fas fa-coffee me-2"></i>Grab a Virtual Coffee
+                        </a>
+                        <a href="{{ url_for('experience') }}" class="btn btn-outline-custom">
+                            <i class="fas fa-briefcase me-2"></i>View My Work
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block additional_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Journey timeline animation
+        const journeyItems = document.querySelectorAll('.journey-item');
+        const journeyObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        journeyItems.forEach(item => {
+            journeyObserver.observe(item);
+        });
+        
+        // Animated counters for fun facts
+        function animateCounter(element) {
+            const target = parseInt(element.getAttribute('data-count'));
+            let current = 0;
+            const increment = target / 100;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current);
+            }, 20);
+        }
+        
+        const factObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const counter = entry.target.querySelector('.fact-number');
+                    if (counter && !counter.classList.contains('animated')) {
+                        counter.classList.add('animated');
+                        animateCounter(counter);
+                    }
+                }
+            });
+        });
+        
+        document.querySelectorAll('.fact-card').forEach(card => {
+            factObserver.observe(card);
+        });
+        
+        // Parallax effect for story cards
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const storyCards = document.querySelectorAll('.story-card');
+            
+            storyCards.forEach((card, index) => {
+                const speed = 0.05 + (index * 0.02);
+                const yPos = -(scrolled * speed);
+                card.style.transform = `translateY(${yPos}px)`;
+            });
+        });
+        
+        // Interactive value cards
+        const valueCards = document.querySelectorAll('.value-card');
+        valueCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.background = 'rgba(255,255,255,0.3)';
+                this.style.transform = 'translateY(-15px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.background = 'rgba(255,255,255,0.1)';
+                this.style.transform = 'translateY(-10px) scale(1)';
+            });
+        });
+        
+        // Staggered animations
+        const fadeElements = document.querySelectorAll('.fade-in');
+        fadeElements.forEach((element, index) => {
+            element.style.animationDelay = `${index * 0.1}s`;
+        });
+        
+        // Interactive journey markers
+        const journeyMarkers = document.querySelectorAll('.journey-marker');
+        journeyMarkers.forEach(marker => {
+            marker.addEventListener('click', function() {
+                // Add ripple effect
+                const ripple = document.createElement('div');
+                ripple.style.cssText = `
+                    position: absolute;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.6);
+                    width: 60px;
+                    height: 60px;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%) scale(0);
+                    animation: ripple 0.6s ease-out;
+                    pointer-events: none;
+                `;
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+        
+        // Personality card hover effects
+        const personalityCards = document.querySelectorAll('.personality-card');
+        personalityCards.forEach(card => {
+            const emoji = card.querySelector('.personality-emoji');
+            
+            card.addEventListener('mouseenter', function() {
+                emoji.style.transform = 'scale(1.2) rotate(10deg)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                emoji.style.transform = 'scale(1) rotate(0deg)';
+            });
+        });
+    });
+</script>
+{% endblock %}

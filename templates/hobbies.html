@@ -1,0 +1,600 @@
+{% extends "base.html" %}
+
+{% block title %}Hobbies & Interests{% endblock %}
+
+{% block meta_description %}Explore {{ personal_info.name if personal_info else "my" }} hobbies and personal interests including photography, rock climbing, and open source contributions.{% endblock %}
+
+{% block additional_css %}
+<style>
+    /* Hero Section */
+    .hobbies-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 6rem 0 4rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hobbies-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><circle cx="200" cy="200" r="100" fill="rgba(255,255,255,0.1)"/><circle cx="800" cy="400" r="150" fill="rgba(255,255,255,0.05)"/><circle cx="500" cy="700" r="80" fill="rgba(255,255,255,0.1)"/></svg>');
+    }
+    
+    .hobbies-hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+    }
+    
+    .hero-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        color: #f59e0b;
+    }
+    
+    /* Hobby Cards */
+    .hobby-card {
+        background: white;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--shadow-lg);
+        transition: all 0.4s ease;
+        height: 100%;
+        position: relative;
+    }
+    
+    .hobby-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+    
+    .hobby-image {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        transition: all 0.4s ease;
+    }
+    
+    .hobby-card:hover .hobby-image {
+        transform: scale(1.1);
+    }
+    
+    .hobby-content {
+        padding: 2rem;
+        position: relative;
+    }
+    
+    .hobby-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .hobby-title i {
+        margin-right: 0.5rem;
+        font-size: 1.2rem;
+        color: var(--accent-color);
+    }
+    
+    .hobby-description {
+        color: var(--text-light);
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+    
+    .hobby-details {
+        background: var(--bg-light);
+        padding: 1rem;
+        border-radius: 10px;
+        border-left: 4px solid var(--primary-color);
+        font-size: 0.9rem;
+        color: var(--text-dark);
+    }
+    
+    .hobby-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        opacity: 0;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-align: center;
+        padding: 2rem;
+    }
+    
+    .hobby-card:hover .hobby-overlay {
+        opacity: 0.95;
+    }
+    
+    .overlay-content h4 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .overlay-content p {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+    
+    /* Interactive Stats */
+    .hobby-stats {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 4rem 0;
+        margin: 4rem 0;
+    }
+    
+    .stat-circle {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-circle:hover {
+        background: rgba(255,255,255,0.3);
+        transform: scale(1.1);
+    }
+    
+    .stat-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+    
+    .stat-label {
+        text-align: center;
+        font-weight: 500;
+    }
+    
+    /* Gallery Section */
+    .hobby-gallery {
+        background: var(--bg-light);
+        padding: 4rem 0;
+    }
+    
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 3rem;
+    }
+    
+    .gallery-item {
+        position: relative;
+        border-radius: 15px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .gallery-item:hover {
+        transform: scale(1.05);
+    }
+    
+    .gallery-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+    
+    .gallery-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0,0,0,0.8));
+        color: white;
+        padding: 2rem 1rem 1rem;
+        transform: translateY(100%);
+        transition: all 0.3s ease;
+    }
+    
+    .gallery-item:hover .gallery-overlay {
+        transform: translateY(0);
+    }
+    
+    /* Modal Styles */
+    .hobby-modal .modal-content {
+        border-radius: 15px;
+        border: none;
+    }
+    
+    .hobby-modal .modal-header {
+        background: var(--gradient-primary);
+        color: white;
+        border-radius: 15px 15px 0 0;
+    }
+    
+    .hobby-modal .modal-body {
+        padding: 2rem;
+    }
+    
+    /* Timeline */
+    .hobby-timeline {
+        position: relative;
+        padding: 2rem 0;
+    }
+    
+    .timeline-item {
+        position: relative;
+        padding-left: 3rem;
+        margin-bottom: 2rem;
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        background: var(--primary-color);
+    }
+    
+    .timeline-item::after {
+        content: '';
+        position: absolute;
+        left: 7px;
+        top: 15px;
+        width: 2px;
+        height: calc(100% + 1rem);
+        background: var(--border-color);
+    }
+    
+    .timeline-item:last-child::after {
+        display: none;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .hobbies-hero {
+            padding: 4rem 0 2rem;
+        }
+        
+        .hero-icon {
+            font-size: 3rem;
+        }
+        
+        .hobby-card {
+            margin-bottom: 2rem;
+        }
+        
+        .gallery-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .stat-circle {
+            width: 100px;
+            height: 100px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hobbies-hero">
+    <div class="container">
+        <div class="hobbies-hero-content fade-in">
+            <div class="hero-icon">
+                <i class="fas fa-heart"></i>
+            </div>
+            <h1 class="font-display mb-3">My Hobbies & Passions</h1>
+            <p class="lead">
+                Beyond coding, I pursue diverse interests that fuel my creativity, 
+                challenge my limits, and keep me inspired in all aspects of life.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Hobbies Grid -->
+<section class="section-padding">
+    <div class="container">
+        <div class="row">
+            {% for hobby in hobbies %}
+            <div class="col-lg-6 col-md-6 mb-4">
+                <div class="hobby-card slide-in-{% if loop.index is odd %}left{% else %}right{% endif %}">
+                    <div class="position-relative">
+                        <img src="{{ url_for('static', filename='images/' + hobby.image) }}" 
+                             alt="{{ hobby.name }}" 
+                             class="hobby-image"
+                             onerror="this.src='https://via.placeholder.com/400x250/667eea/ffffff?text={{ hobby.name }}'">
+                        
+                        <div class="hobby-overlay">
+                            <div class="overlay-content">
+                                <h4>{{ hobby.name }}</h4>
+                                <p>{{ hobby.details }}</p>
+                                <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#hobbyModal{{ loop.index }}">
+                                    <i class="fas fa-info-circle me-1"></i>Learn More
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="hobby-content">
+                        <h3 class="hobby-title">
+                            {% if 'Photography' in hobby.name %}
+                                <i class="fas fa-camera"></i>
+                            {% elif 'Climbing' in hobby.name %}
+                                <i class="fas fa-mountain"></i>
+                            {% elif 'Source' in hobby.name %}
+                                <i class="fab fa-github"></i>
+                            {% elif 'Chess' in hobby.name %}
+                                <i class="fas fa-chess"></i>
+                            {% else %}
+                                <i class="fas fa-star"></i>
+                            {% endif %}
+                            {{ hobby.name }}
+                        </h3>
+                        <p class="hobby-description">{{ hobby.description }}</p>
+                        <div class="hobby-details">
+                            <strong>Details:</strong> {{ hobby.details }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal for each hobby -->
+            <div class="modal fade hobby-modal" id="hobbyModal{{ loop.index }}" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="fas fa-{% if 'Photography' in hobby.name %}camera{% elif 'Climbing' in hobby.name %}mountain{% elif 'Source' in hobby.name %}code{% elif 'Chess' in hobby.name %}chess{% else %}star{% endif %} me-2"></i>
+                                {{ hobby.name }}
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <img src="{{ url_for('static', filename='images/' + hobby.image) }}" 
+                                         alt="{{ hobby.name }}" 
+                                         class="img-fluid rounded mb-3"
+                                         onerror="this.src='https://via.placeholder.com/400x300/667eea/ffffff?text={{ hobby.name }}'">
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>About This Hobby</h6>
+                                    <p>{{ hobby.description }}</p>
+                                    <h6>Experience & Skills</h6>
+                                    <p>{{ hobby.details }}</p>
+                                    
+                                    {% if 'Photography' in hobby.name %}
+                                    <div class="hobby-timeline">
+                                        <div class="timeline-item">
+                                            <h6>2019</h6>
+                                            <p>Started with smartphone photography</p>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <h6>2021</h6>
+                                            <p>Invested in first DSLR camera</p>
+                                        </div>
+                                        <div class="timeline-item">
+                                            <h6>2023</h6>
+                                            <p>Won local photography contest</p>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Hobby Statistics -->
+<section class="hobby-stats">
+    <div class="container">
+        <h2 class="text-center font-display mb-5 fade-in">By the Numbers</h2>
+        <div class="row">
+            <div class="col-md-3 col-6 text-center">
+                <div class="stat-circle fade-in">
+                    <i class="fas fa-camera stat-icon"></i>
+                    <span class="stat-number" data-count="500">0</span>
+                </div>
+                <p class="stat-label">Photos Taken</p>
+            </div>
+            <div class="col-md-3 col-6 text-center">
+                <div class="stat-circle fade-in">
+                    <i class="fas fa-mountain stat-icon"></i>
+                    <span class="stat-number" data-count="25">0</span>
+                </div>
+                <p class="stat-label">Routes Climbed</p>
+            </div>
+            <div class="col-md-3 col-6 text-center">
+                <div class="stat-circle fade-in">
+                    <i class="fas fa-code stat-icon"></i>
+                    <span class="stat-number" data-count="15">0</span>
+                </div>
+                <p class="stat-label">Open Source Contributions</p>
+            </div>
+            <div class="col-md-3 col-6 text-center">
+                <div class="stat-circle fade-in">
+                    <i class="fas fa-chess stat-icon"></i>
+                    <span class="stat-number" data-count="100">0</span>
+                </div>
+                <p class="stat-label">Chess Games Played</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Gallery Section -->
+<section class="hobby-gallery">
+    <div class="container">
+        <h2 class="section-title font-display text-gradient fade-in">Hobby Gallery</h2>
+        <p class="section-subtitle fade-in">A visual journey through my interests</p>
+        
+        <div class="gallery-grid">
+            {% for hobby in hobbies %}
+            <div class="gallery-item fade-in">
+                <img src="{{ url_for('static', filename='images/' + hobby.image) }}" 
+                     alt="{{ hobby.name }}" 
+                     class="gallery-image"
+                     onerror="this.src='https://via.placeholder.com/400x200/667eea/ffffff?text={{ hobby.name }}'">
+                <div class="gallery-overlay">
+                    <h5>{{ hobby.name }}</h5>
+                    <p>{{ hobby.description[:100] }}...</p>
+                </div>
+            </div>
+            {% endfor %}
+            
+            <!-- Add some placeholder gallery items -->
+            <div class="gallery-item fade-in">
+                <img src="https://via.placeholder.com/400x200/764ba2/ffffff?text=Adventure+Awaits" 
+                     alt="Adventure" class="gallery-image">
+                <div class="gallery-overlay">
+                    <h5>Adventure Time</h5>
+                    <p>Always seeking new experiences and challenges</p>
+                </div>
+            </div>
+            
+            <div class="gallery-item fade-in">
+                <img src="https://via.placeholder.com/400x200/f59e0b/ffffff?text=Learning+Never+Stops" 
+                     alt="Learning" class="gallery-image">
+                <div class="gallery-overlay">
+                    <h5>Continuous Learning</h5>
+                    <p>Every hobby teaches valuable life lessons</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="section-padding">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <div class="card-custom p-4 fade-in">
+                    <h3 class="font-display mb-3">Share Your Hobbies!</h3>
+                    <p class="mb-4">
+                        I love connecting with people who share similar interests or have fascinating hobbies of their own. 
+                        Let's exchange stories and maybe even collaborate on something fun!
+                    </p>
+                    <div class="d-flex flex-wrap justify-content-center gap-3">
+                        <a href="{{ url_for('contact') }}" class="btn btn-primary-custom">
+                            <i class="fas fa-comments me-2"></i>Let's Chat
+                        </a>
+                        <a href="{{ url_for('travel') }}" class="btn btn-outline-custom">
+                            <i class="fas fa-map-marked-alt me-2"></i>See My Travels
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block additional_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animated counter for hobby stats
+        function animateCounter(element) {
+            const target = parseInt(element.getAttribute('data-count'));
+            let current = 0;
+            const increment = target / 50;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current);
+            }, 40);
+        }
+        
+        // Intersection observer for stats animation
+        const statsObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const counter = entry.target.querySelector('.stat-number');
+                    if (counter && !counter.classList.contains('animated')) {
+                        counter.classList.add('animated');
+                        animateCounter(counter);
+                    }
+                }
+            });
+        });
+        
+        // Observe stat circles
+        document.querySelectorAll('.stat-circle').forEach(circle => {
+            statsObserver.observe(circle);
+        });
+        
+        // Gallery lightbox effect
+        document.querySelectorAll('.gallery-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const img = this.querySelector('.gallery-image');
+                const modal = document.createElement('div');
+                modal.className = 'modal fade';
+                modal.innerHTML = `
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-body p-0">
+                                <img src="${img.src}" alt="${img.alt}" class="img-fluid w-100">
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                const bsModal = new bootstrap.Modal(modal);
+                bsModal.show();
+                
+                modal.addEventListener('hidden.bs.modal', () => {
+                    document.body.removeChild(modal);
+                });
+            });
+        });
+        
+        // Parallax effect for hero section
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const heroSection = document.querySelector('.hobbies-hero');
+            if (heroSection) {
+                const speed = scrolled * 0.3;
+                heroSection.style.transform = `translateY(${speed}px)`;
+            }
+        });
+        
+        // Staggered animation for hobby cards
+        const hobbyCards = document.querySelectorAll('.hobby-card');
+        hobbyCards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.2}s`;
+        });
+    });
+</script>
+{% endblock %}
