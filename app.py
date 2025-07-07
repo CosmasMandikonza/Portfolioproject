@@ -212,4 +212,4 @@ def internal_error(error):
 if __name__ == '__main__':
     # Ensure the app only runs in debug mode during development
     debug_mode = os.environ.get('FLASK_ENV') == 'development'
-    app.run(debug=debug_mode, host='127.0.0.1', port=5000)
+    app.run(debug=debug_mode, host='0.0.0.0', port=5000)
