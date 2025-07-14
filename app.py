@@ -8,6 +8,11 @@ from peewee import *
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')
 from playhouse.shortcuts import model_to_dict
+import pymysql 
+pymysql.install_as_MySQLdb()
+from dotenv import load_dotenv
+load_dotenv()
+
 # Database configuration
 mydb = MySQLDatabase(
     os.getenv('MYSQL_DATABASE' ),
@@ -154,6 +159,7 @@ NAVIGATION = [
     {'name': 'Home', 'endpoint': 'index', 'icon': 'fas fa-home'},
     {'name': 'About', 'endpoint': 'about', 'icon': 'fas fa-user'},
     {'name': 'Experience', 'endpoint': 'experience', 'icon': 'fas fa-briefcase'},
+    {'name': 'Timeline', 'endpoint': 'timeline', 'icon': 'fas fa-clock'},
     {'name': 'Hobbies', 'endpoint': 'hobbies', 'icon': 'fas fa-heart'},
     {'name': 'Travel', 'endpoint': 'travel', 'icon': 'fas fa-map-marked-alt'},
     {'name': 'Contact', 'endpoint': 'contact', 'icon': 'fas fa-envelope'}
@@ -247,6 +253,11 @@ def get_time_line():
 TimelinePost.select().order_by(TimelinePost.created_at.desc())
         ]
     }
+@app.route('/timeline')
+def timeline():
+    """Timeline page route"""
+    return render_template('timeline.html', 
+                         personal_info=PORTFOLIO_DATA['personal_info'])
 
 if __name__ == '__main__':
     # Ensure the app only runs in debug mode during development
