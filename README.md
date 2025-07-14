@@ -1,79 +1,232 @@
-# Production Engineering - Week 1 - Portfolio Site
+# 🚀 MLH Fellowship Portfolio - Cosmas Mandikonza
 
-Welcome to the MLH Fellowship! During Week 1, you'll be using Flask to build a portfolio site. This site will be the foundation for activities we do in future weeks so spend time this week making it your own and reflect your personality!
+A modern, responsive portfolio website built with Flask showcasing my journey as a software engineer and MLH Fellow.
 
-## Tasks
+## 🌟 Live Demo
 
-Once you've got your portfolio downloaded and running using the instructions below, you should attempt to complete the following tasks.
+Visit the live portfolio: [Portfolio Link](your-deployed-url-here)
 
-For each of these tasks, you should create an [Issue](https://docs.github.com/en/issues/tracking-your-work-with-issues/about-issues) and work on them in a new [branch](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-branches). When the task has been completed, you should open a [Pull Request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) and get another fellow in your pod to give you feedback before merging it in.
+## 📸 Screenshots
 
-*Note: Make sure to include a link to the Issue you're progressing on inside of your Pull Request so your reviewer knows what you're progressing on!*
+### Homepage
+![Homepage Screenshot](static/images/homepage-screenshot.png)
 
-### GitHub Tasks
-- [x] Create Issues for each task below
-- [x] Progress on each task in a new branch
-- [x] Open a Pull Request when a task is finished to get feedback
+### Travel Map
+![Travel Map Screenshot](static/images/travel-screenshot.png)
 
-### Portfolio Tasks
-- [x] Add a photo of yourself to the website
-- [x] Add an "About youself" section to the website.
-- [x] Add your previous work experiences
-- [x] Add your hobbies (including images)
-- [x] Add your current/previous education
-- [x] Add a map of all the cool locations/countries you visited
+## ✨ Features
 
-### Flask Tasks
-- [x] Get your Flask app running locally on your machine using the instructions below.
-- [x] Add a template for adding multiple work experiences/education/hobbies using [Jinja](https://jinja.palletsprojects.com/en/3.0.x/api/#basics)
-- [x] Create a new page to display hobbies.
-- [x] Add a menu bar that dynamically displays other pages in the app
+- 🎨 **Modern Responsive Design** - Works perfectly on all devices
+- 🗺️ **Interactive Travel Map** - Explore places I've visited with custom markers
+- 👨‍💻 **Dynamic Experience Timeline** - Professional journey with Jinja2 templates
+- 🎯 **Hobbies Showcase** - Dedicated page with interactive elements
+- 📱 **Mobile-First Design** - Optimized for all screen sizes
+- 🎭 **Smooth Animations** - Enhanced user experience with CSS animations
+- 📧 **Contact Form** - Professional contact form with validation
+- 🚨 **Custom Error Pages** - User-friendly 404 and 500 error handling
 
+## 🛠️ Technical Stack
 
-## Getting Started
+- **Backend**: Flask 2.3.3 (Python)
+- **Frontend**: HTML5, CSS3, JavaScript
+- **Templating**: Jinja2
+- **Styling**: Bootstrap 5.3.0, Custom CSS
+- **Icons**: Font Awesome 6.4.0
+- **Fonts**: Google Fonts (Inter, Playfair Display)
 
-You need to do all your progress here.
+## 🏗️ Project Structure
 
-## Installation
-
-Make sure you have python3 and pip installed
-
-Create and activate virtual environment using virtualenv
-```bash
-$ python -m venv python3-virtualenv
-$ source python3-virtualenv/bin/activate
+```
+portfolio/
+├── app.py                 # Main Flask application
+├── requirements.txt       # Python dependencies
+├── .env                   # Environment variables
+├── static/
+│   ├── css/              # Custom stylesheets
+│   ├── js/               # Custom JavaScript
+│   └── images/           # Profile photos and assets
+├── templates/
+│   ├── base.html         # Base template
+│   ├── index.html        # Homepage
+│   ├── about.html        # About page
+│   ├── experience.html   # Experience timeline
+│   ├── hobbies.html      # Hobbies showcase
+│   ├── travel.html       # Interactive travel map
+│   ├── contact.html      # Contact form
+│   └── errors/           # Error page templates
+└── README.md
 ```
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install all dependencies!
+## 🚀 Quick Start
 
-```bash
-pip install -r requirements.txt
+### Prerequisites
+
+- Python 3.8+
+- pip (Python package manager)
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/CosmasMandikonza/Portfolioproject.git
+   cd Portfolioproject
+   ```
+
+2. **Create virtual environment**
+   ```bash
+   python -m venv python3-virtualenv
+   source python3-virtualenv/bin/activate  # On Windows: python3-virtualenv\Scripts\activate
+   ```
+
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Set up environment variables**
+   ```bash
+   cp example.env .env
+   # Edit .env with your configurations
+   ```
+
+5. **Run the application**
+   ```bash
+   export FLASK_ENV=development  # On Windows: set FLASK_ENV=development
+   flask run
+   ```
+
+6. **Open your browser**
+   ```
+   Navigate to http://127.0.0.1:5000
+   ```
+
+## 📄 Pages Overview
+
+### 🏠 Homepage (`/`)
+- Hero section with profile photo
+- Animated statistics
+- Skills showcase
+- Call-to-action sections
+
+### 👨‍💻 About (`/about`)
+- Personal journey timeline
+- Core values and personality
+- Professional background
+- Fun facts and achievements
+
+### 💼 Experience (`/experience`)
+- Work experience timeline
+- Education background
+- Skills with progress bars
+- Professional achievements
+
+### 🎯 Hobbies (`/hobbies`)
+- Interactive hobby cards
+- Photo galleries
+- Personal interests
+- Statistics and timelines
+
+### 🗺️ Travel (`/travel`)
+- Interactive world map
+- Travel statistics
+- Location stories
+- Future travel plans
+
+### 📧 Contact (`/contact`)
+- Professional contact form
+- Social media links
+- FAQ section
+- Contact information
+
+## 🎨 Design Features
+
+- **Color Scheme**: Modern blue gradient with accent colors
+- **Typography**: Professional font pairing (Inter + Playfair Display)
+- **Animations**: Smooth CSS transitions and JavaScript interactions
+- **Responsive**: Mobile-first design with Bootstrap grid
+- **Accessibility**: ARIA labels and semantic HTML
+
+## 🔧 Development
+
+### Adding New Pages
+
+1. Create template in `templates/`
+2. Add route in `app.py`
+3. Update navigation in `base.html`
+4. Style with CSS in template
+
+### Customizing Content
+
+Update the `PORTFOLIO_DATA` dictionary in `app.py` with your personal information:
+
+```python
+PORTFOLIO_DATA = {
+    'personal_info': {
+        'name': 'Your Name',
+        'title': 'Your Title',
+        'email': 'your.email@example.com',
+        # ... add your details
+    }
+}
 ```
 
-## Usage
+## 📱 Mobile Optimization
 
-Create a .env file using the example.env template (make a copy using the variables inside of the template)
+- Responsive navigation with mobile menu
+- Touch-friendly interactive elements
+- Optimized image sizes
+- Fast loading on mobile networks
 
-Start flask development server
-```bash
-$ export FLASK_ENV=development
-$ flask run
-```
+## 🚀 Deployment
 
-You should get a response like this in the terminal:
-```
-❯ flask run
- * Environment: development
- * Debug mode: on
- * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
-```
+### Heroku Deployment
 
-You'll now be able to access the website at `localhost:5000` or `127.0.0.1:5000` in the browser! 
+1. Create `Procfile`:
+   ```
+   web: python app.py
+   ```
 
-*Note: The portfolio site will only work on your local machine while you have it running inside of your terminal. We'll go through how to host it in the cloud in the next few weeks!* 
+2. Deploy:
+   ```bash
+   heroku create your-portfolio-app
+   git push heroku main
+   ```
 
-## Contributing
+### Other Platforms
 
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+The application can be deployed on any platform supporting Python/Flask:
+- Vercel
+- Railway
+- PythonAnywhere
+- DigitalOcean App Platform
 
-Please make sure to update tests as appropriate.
+## 🤝 MLH Fellowship
+
+This portfolio was created as part of the MLH Fellowship Production Engineering track, demonstrating:
+
+- ✅ Flask web application development
+- ✅ Responsive frontend design
+- ✅ Git workflow and collaboration
+- ✅ Professional project documentation
+- ✅ Modern web development practices
+
+## 📝 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## 🙏 Acknowledgments
+
+- MLH Fellowship for the opportunity and guidance
+- Fellow participants for inspiration and collaboration
+- Open source community for amazing tools and libraries
+
+## 📞 Contact
+
+- **Portfolio**: [Live Site](your-portfolio-url)
+- **LinkedIn**: [Your LinkedIn](your-linkedin-url)
+- **GitHub**: [Your GitHub](your-github-url)
+- **Email**: cosmas.t.mandikonza@gmail.com
+
+---
+
+**Built with ❤️ during MLH Fellowship 2025**
