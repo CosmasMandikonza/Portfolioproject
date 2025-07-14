@@ -4,10 +4,31 @@ import os
 from flask import Flask, render_template, url_for, request, flash, redirect
 from datetime import datetime
 import json
-
+from peewee import *
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your-secret-key-here')
+from playhouse.shortcuts import model_to_dict
+# Database configuration
+mydb = MySQLDatabase(
+    os.getenv('MYSQL_DATABASE' ),
+    user=os.getenv('MYSQL_USER'),
+    password=os.getenv('MYSQL_PASSWORD'),
+    host=os.getenv('MYSQL_HOST'),
+    port=3306
+)
+print(mydb)
 
+class TimelinePost(Model):
+    name = CharField()
+    email = CharField()
+    content = TextField()
+    created_at = DateTimeField(default=datetime.now)
+
+    class Meta:
+        database = mydb
+
+mydb.connect()
+mydb.create_tables([TimelinePost])
 # Portfolio data - in a real app, this would come from a database
 PORTFOLIO_DATA = {
     'personal_info': {
@@ -208,6 +229,24 @@ def not_found_error(error):
 def internal_error(error):
     """Handle 500 errors"""
     return render_template('errors/500.html'), 500
+
+@app.route('/api/timeline_post', methods=['POST'])
+def post_time_line():
+    name = request.form['name']
+    email = request.form['email']
+    content = request.form['content']
+    timeline_post = TimelinePost.create(name=name, email=email, content=content)
+    return model_to_dict(timeline_post)
+
+@app.route('/api/timeline_post', methods=['GET'])
+def get_time_line():
+    return {
+        'timeline_posts': [
+            model_to_dict(p)
+            for p in 
+TimelinePost.select().order_by(TimelinePost.created_at.desc())
+        ]
+    }
 
 if __name__ == '__main__':
     # Ensure the app only runs in debug mode during development
