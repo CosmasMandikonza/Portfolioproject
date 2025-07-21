@@ -13,15 +13,19 @@ pymysql.install_as_MySQLdb()
 from dotenv import load_dotenv
 load_dotenv()
 
-# Database configuration
-mydb = MySQLDatabase(
-    os.getenv('MYSQL_DATABASE' ),
-    user=os.getenv('MYSQL_USER'),
-    password=os.getenv('MYSQL_PASSWORD'),
-    host=os.getenv('MYSQL_HOST'),
-    port=3306
-)
-print(mydb)
+import os
+if os.getenv("TESTING") == "true":
+    print("Running in test mode")
+    mydb = SqliteDatabase('file:memory?mode=memory&cache=shared', uri=True)
+else:
+    mydb = MySQLDatabase(
+        os.getenv('MYSQL_DATABASE'),
+        user=os.getenv('MYSQL_USER'),
+        password=os.getenv('MYSQL_PASSWORD'),
+        host=os.getenv('MYSQL_HOST'),
+        port=3306
+    )
+    print(mydb)
 
 class TimelinePost(Model):
     name = CharField()
@@ -238,9 +242,17 @@ def internal_error(error):
 
 @app.route('/api/timeline_post', methods=['POST'])
 def post_time_line():
-    name = request.form['name']
-    email = request.form['email']
-    content = request.form['content']
+    name = request.form.get('name')
+    email = request.form.get('email')
+    content = request.form.get('content')
+    
+    if not name:
+        return "Invalid name", 400
+    if not content:
+        return "Invalid content", 400
+    if not email or '@' not in email:
+        return "Invalid email", 400
+    
     timeline_post = TimelinePost.create(name=name, email=email, content=content)
     return model_to_dict(timeline_post)
 
@@ -249,8 +261,7 @@ def get_time_line():
     return {
         'timeline_posts': [
             model_to_dict(p)
-            for p in 
-TimelinePost.select().order_by(TimelinePost.created_at.desc())
+            for p in TimelinePost.select().order_by(TimelinePost.created_at.desc())
         ]
     }
 @app.route('/timeline')
