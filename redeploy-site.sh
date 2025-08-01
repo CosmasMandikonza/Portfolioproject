@@ -4,22 +4,14 @@
 cd ~/Portfolioproject || { echo "Directory not found!"; exit 1; }
 
 # Update your git repo to latest main branch
-git fetch origin main
-git reset --hard origin/main
+git fetch origin main && git reset --hard origin/main
 
-# Fix SQLite configuration (since git reset reverts it)
-sed -i '/# Database configuration/,/print(mydb)/c\
-# Database configuration - Using SQLite\
-from peewee import SqliteDatabase\
-mydb = SqliteDatabase("portfolio.db")\
-print("Using SQLite database:", mydb)' app.py
+#Spinning any existing containers down to prevent memory issues on vps instances
+docker compose -f docker-compose.prod.yml down
 
-# Activate virtual environment and install dependencies
-source venv/bin/activate
-pip install -r requirements.txt
+#The spin up  new container instances 
 
-# Restart myportfolio service
-systemctl restart myportfolio
+docker compose -f docker-compose.prod.yml -d --build 
 
 echo "Redeploy complete. Portfolio service has been restarted."
 echo "Check status with: systemctl status myportfolio"
