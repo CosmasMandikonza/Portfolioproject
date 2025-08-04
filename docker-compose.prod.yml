@@ -8,7 +8,8 @@ services:
       - .env
     depends_on:
       - mysql
-   nginx:
+
+  nginx:
     container_name: nginx
     image: jonasal/nginx-certbot
     restart: always
@@ -22,6 +23,7 @@ services:
       - ./user_conf.d:/etc/nginx/user_conf.d
     depends_on:
       - myportfolio
+
   mysql:
     container_name: mysql
     image: mariadb
@@ -34,3 +36,4 @@ services:
 volumes:
   mydatabase:
   nginx_secrets:
+
