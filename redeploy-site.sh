@@ -14,4 +14,4 @@ docker compose -f docker-compose.prod.yml down
 docker compose -f docker-compose.prod.yml -d --build 
 
 echo "Redeploy complete. Portfolio service has been restarted."
-echo "Check status with: systemctl status myportfolio"
+echo "Check status with: docker ps"
