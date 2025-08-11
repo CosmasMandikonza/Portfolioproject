@@ -1,10 +1,10 @@
-# 🚀 MLH Fellowship Portfolio - Cosmas Mandikonza
+# 🚀 MLH Fellowship Portfolio - Cosmas T Mandikonza.
 
 A modern, responsive portfolio website built with Flask showcasing my journey as a software engineer and MLH Fellow.
 
 ## 🌟 Live Demo
 
-Visit the live portfolio: [Portfolio Link](your-deployed-url-here)
+Visit the live portfolio: [Portfolio Link](https://cosmas-portfolio.duckdns.org/)
 
 ## 📸 Screenshots
 
