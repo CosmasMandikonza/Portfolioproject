@@ -1,11 +1,9 @@
 name: Deploy
-
 on:
   push:
     branches:
       - main
   workflow_dispatch:
-
 jobs:
   deploy:
     name: "Deploy to VPS"
@@ -30,7 +28,10 @@ jobs:
       
       - name: Deploy site 
         run: ssh my-vps '~/Portfolioproject/redeploy-site.sh'
-
+      
+      - name: Print container status
+        run: |
+          ssh my-vps 'cd ~/Portfolioproject && docker compose -f docker-compose.prod.yml ps'
 
 
 
