@@ -2,7 +2,7 @@
 
 A Flask web application I designed, containerized, and operate as a real production service on a **self-hosted CentOS Linux server I configured from the ground up**. Built during the MLH Fellowship (Production Engineering track), the interesting part of this project is less the site itself and more how it is deployed, supervised, and kept running: real infrastructure, not a sandbox.
 
-**Live site:** _add your URL_  ·  **Stack:** Python / Flask · Docker · Nginx · systemd · GitHub Actions
+ **Stack:** Python / Flask · Docker · Nginx · systemd · GitHub Actions
 
 ---
 
